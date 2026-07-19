@@ -63,11 +63,19 @@
         <div class="update-card">
 
             <small>Last Update</small>
+@if($lastUpdate)
 
-            <h3>{{ now()->format('d M Y') }}</h3>
+    <h3>{{ \Carbon\Carbon::parse($lastUpdate)->format('d M Y') }}</h3>
 
-            <span>{{ now()->format('H:i') }}</span>
+    <span>{{ \Carbon\Carbon::parse($lastUpdate)->format('H:i') }}</span>
 
+@else
+
+    <h3>-</h3>
+
+    <span>-</span>
+
+@endif
         </div>
 
     </div>
@@ -324,5 +332,10 @@ if (chartCanvas) {
 }
 
 </script>
-
+<script>
+    // Refresh dashboard setiap 30 detik
+    setInterval(function () {
+        location.reload();
+    }, 30000);
+</script>
 @endpush

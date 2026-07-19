@@ -44,6 +44,9 @@ class DashboardController extends Controller
 
         $news = $response->json()['articles'] ?? [];
 
+        // Waktu terakhir data Country diperbarui
+        $lastUpdate = Country::max('updated_at');
+
         return view('dashboard', compact(
             'countries',
             'weatherCountries',
@@ -54,7 +57,8 @@ class DashboardController extends Controller
             'highRisk',
             'avgGdp',
             'avgInflation',
-            'news'
+            'news',
+            'lastUpdate'
         ));
     }
 }
