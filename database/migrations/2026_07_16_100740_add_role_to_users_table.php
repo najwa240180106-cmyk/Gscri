@@ -1,38 +1,22 @@
 <?php
 
-namespace App\Http\Controllers;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use App\Models\User;
-use Illuminate\Http\Request;
-
-class UserController extends Controller
+return new class extends Migration
 {
-    public function index()
+    public function up(): void
     {
-        $users = User::orderBy('name')->get();
-
-        return view('users.index', compact('users'));
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('role')->default('user');
+        });
     }
 
-    public function updateRole(User $user)
+    public function down(): void
     {
-        $user->role = $user->role === 'admin'
-            ? 'user'
-            : 'admin';
-
-        $user->save();
-
-        return back()->with('success', 'Role berhasil diubah.');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('role');
+        });
     }
-
-    public function destroy(User $user)
-    {
-        if ($user->id == auth()->id()) {
-            return back()->with('error', 'Tidak dapat menghapus akun sendiri.');
-        }
-
-        $user->delete();
-
-        return back()->with('success', 'User berhasil dihapus.');
-    }
-}
+};
