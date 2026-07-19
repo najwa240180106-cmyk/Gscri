@@ -11,24 +11,28 @@
     </div>
 
     {{-- Import Port --}}
-    <form action="{{ route('ports.import') }}" method="POST" style="margin-bottom:20px;">
-        @csrf
+    @if(auth()->user()->isAdmin())
 
-        <input
-            type="text"
-            name="name"
-            placeholder="Contoh: Tanjung Priok"
-            required>
+<form action="{{ route('ports.import') }}" method="POST" style="margin-bottom:20px;">
+    @csrf
 
-        <button type="submit" class="btn-primary">
-            Import Port
-        </button>
+    <input
+        type="text"
+        name="name"
+        placeholder="Contoh: Tanjung Priok"
+        required>
 
-        <a href="{{ route('ports.create') }}" class="btn-primary">
-            + Tambah Manual
-        </a>
+    <button type="submit" class="btn-primary">
+        Import Port
+    </button>
 
-    </form>
+    <a href="{{ route('ports.create') }}" class="btn-primary">
+        + Tambah Manual
+    </a>
+
+</form>
+
+@endif
 
     @if(session('success'))
         <div style="color:green;margin-bottom:10px;">
@@ -79,32 +83,36 @@
                     @endif
                 </td>
 
-                <td>
+               <td>
 
-                    <a href="{{ route('ports.edit', $port) }}"
-                        class="btn-edit">
-                        ✏️
-                    </a>
+    <a href="{{ route('ports.show', $port) }}" class="btn btn-primary">
+        View
+    </a>
 
-                    <form action="{{ route('ports.destroy', $port) }}"
-                        method="POST"
-                        style="display:inline;">
+    @if(auth()->user()->isAdmin())
 
-                        @csrf
-                        @method('DELETE')
+        <a href="{{ route('ports.edit', $port) }}" class="btn-edit">
+            ✏️
+        </a>
 
-                        <button
-                            type="submit"
-                            class="btn-delete"
-                            onclick="return confirm('Yakin ingin menghapus port ini?')">
+        <form action="{{ route('ports.destroy', $port) }}"
+              method="POST"
+              style="display:inline;">
 
-                            🗑️
+            @csrf
+            @method('DELETE')
 
-                        </button>
+            <button type="submit"
+                    class="btn-delete"
+                    onclick="return confirm('Yakin ingin menghapus port ini?')">
+                🗑️
+            </button>
 
-                    </form>
+        </form>
 
-                </td>
+    @endif
+
+</td>
 
             </tr>
 

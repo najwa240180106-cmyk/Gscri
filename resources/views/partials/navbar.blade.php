@@ -31,14 +31,17 @@
 
             </div>
 
-            <div>
+<div>
 
-                <strong>Najwanadaluthfiya</strong>
+    <strong>{{ auth()->user()->name }}</strong>
 
-                <small>Administrator</small>
+    <small>
 
-            </div>
+        {{ ucfirst(auth()->user()->role) }}
 
+    </small>
+
+</div>
         </div>
 
     </div>

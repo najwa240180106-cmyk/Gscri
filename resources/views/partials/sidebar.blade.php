@@ -8,14 +8,13 @@
     <nav class="sidebar-menu">
 
         {{-- Dashboard --}}
-        <a href="{{ url('/') }}"
-           class="menu {{ request()->is('/') ? 'active' : '' }}">
-            📊 Dashboard
-        </a>
+        <a href="{{ route('dashboard') }}"
+   class="menu {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+    📊 Dashboard
+</a>
 
-        {{-- Master Data --}}
         <div class="menu-title">
-            MASTER DATA
+            MONITORING
         </div>
 
         <a href="{{ route('countries.index') }}"
@@ -23,41 +22,80 @@
             🌍 Countries
         </a>
 
-         <a href="{{ route('ports.index') }}"
-             class="menu {{ request()->is('ports*') ? 'active' : '' }}">
-             ⚓ Pelabuhan
+        <a href="{{ route('ports.index') }}"
+           class="menu {{ request()->is('ports*') ? 'active' : '' }}">
+            ⚓ Ports
         </a>
+
         <a href="{{ route('economy.index') }}"
-        class="menu {{ request()->is('economy*') ? 'active' : '' }}">
+           class="menu {{ request()->is('economy*') ? 'active' : '' }}">
             📈 Economy
         </a>
 
-       <a href="{{ route('weather.index') }}"
-        class="menu {{ request()->is('weather*') ? 'active' : '' }}">
-         🌦️ Cuaca
-         </a>
-        <a href="/news"
-        class="menu {{ request()->is('news') ? 'active' : '' }}">
-        📰 News
+        <a href="{{ route('weather.index') }}"
+           class="menu {{ request()->is('weather*') ? 'active' : '' }}">
+            🌦 Weather
         </a>
 
-        {{-- Analytics --}}
+        <a href="{{ route('news.index') }}"
+           class="menu {{ request()->is('news*') ? 'active' : '' }}">
+            📰 News
+        </a>
+
+        <a href="{{ route('risk.index') }}"
+           class="menu {{ request()->is('risk*') ? 'active' : '' }}">
+            🚨 Risk Analysis
+        </a>
+
+        {{-- Menu Admin --}}
+        @if(auth()->user()->isAdmin())
+
+    <div class="menu-title">
+        ADMIN PANEL
+    </div>
+
+    <a href="{{ route('users.index') }}"
+       class="menu {{ request()->is('users*') ? 'active' : '' }}">
+        👥 User Management
+    </a>
+
+    <a href="{{ route('countries.index') }}"
+       class="menu {{ request()->is('countries*') ? 'active' : '' }}">
+        🌍 Manage Countries
+    </a>
+
+    <a href="{{ route('ports.index') }}"
+       class="menu {{ request()->is('ports*') ? 'active' : '' }}">
+        ⚓ Manage Ports
+    </a>
+
+@endif
+
         <div class="menu-title">
-            ANALYTICS
-        </div>
-      <a href="/risk"
-         class="menu {{ request()->is('risk*') ? 'active' : '' }}">
-         📊 Risk Analysis
-        </a>
-
-        {{-- Settings --}}
-        <div class="menu-title">
-            SYSTEM
+            ACCOUNT
         </div>
 
-        <a href="#" class="menu">
-            ⚙️ Settings
+        <a href="{{ route('profile.edit') }}"
+           class="menu">
+            👤 Profile
         </a>
+
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+
+            <button type="submit"
+                style="
+                    width:100%;
+                    background:none;
+                    border:none;
+                    color:inherit;
+                    text-align:left;
+                    padding:12px 16px;
+                    cursor:pointer;
+                    font-size:15px;">
+                🚪 Logout
+            </button>
+        </form>
 
     </nav>
 

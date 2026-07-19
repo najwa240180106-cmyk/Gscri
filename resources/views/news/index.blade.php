@@ -1,7 +1,20 @@
 @extends('layouts.app')
 
 @section('content')
+@if(auth()->user()->isAdmin())
+<form action="{{ route('news.update') }}" method="POST">
+    @csrf
+    <button type="submit" class="btn btn-primary">
+        📰 Update News
+    </button>
+</form>
+@endif
 
+@if(session('success'))
+<div class="alert alert-success">
+    {{ session('success') }}
+</div>
+@endif
 <div class="panel">
 
     <div class="panel-header">

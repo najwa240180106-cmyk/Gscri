@@ -1,105 +1,53 @@
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+window.addEventListener("load", () => {
 
-document.addEventListener('DOMContentLoaded', () => {
+    if (typeof L === "undefined") {
+        console.log("Leaflet gagal dimuat");
+        return;
+    }
 
-    const mapContainer = document.getElementById('worldMap');
+    const el = document.getElementById("worldMap");
 
-    if (!mapContainer) return;
+    if (!el) {
+        console.log("worldMap tidak ditemukan");
+        return;
+    }
 
-    const countries = window.countries || [];
+    const map = L.map("worldMap").setView([20, 0], 2);
 
-    console.log("Countries:", countries);
-
-    const map = L.map('worldMap');
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap"
     }).addTo(map);
 
-    const bounds = [];
+    // Marker negara
+    if (window.countries) {
 
-    countries.forEach(country => {
+        window.countries.forEach(country => {
 
-        // Lewati jika koordinat kosong
-        if (
-            country.latitude == null ||
-            country.longitude == null ||
-            country.latitude === "" ||
-            country.longitude === ""
-        ) {
-            return;
-        }
+            let color = "#16a34a";
 
-        const lat = parseFloat(country.latitude);
-        const lng = parseFloat(country.longitude);
+            if (country.risk === "MEDIUM") color = "#facc15";
+            if (country.risk === "HIGH") color = "#ef4444";
 
-        bounds.push([lat, lng]);
+            L.circleMarker(
+                [country.latitude, country.longitude],
+                {
+                    radius: 8,
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.9
+                }
+            )
+            .addTo(map)
+            .bindPopup(`
+                <b>${country.name}</b><br>
+                Risk : ${country.risk}<br>
+                GDP : ${country.gdp}%<br>
+                Inflation : ${country.inflation}%
+            `);
 
-        let color = "#22c55e"; // LOW
-
-        if (country.risk === "MEDIUM") {
-            color = "#facc15";
-        }
-
-        if (country.risk === "HIGH") {
-            color = "#ef4444";
-        }
-
-        L.circleMarker([lat, lng], {
-            radius: 10,
-            color: "#ffffff",
-            weight: 2,
-            fillColor: color,
-            fillOpacity: 1
-        })
-        .addTo(map)
-        .bindPopup(`
-            <div class="popup-card">
-
-                <div class="popup-title">
-                    🌍 ${country.name}
-                </div>
-
-                <div class="popup-risk">
-                    ${country.risk}
-                </div>
-
-                <div class="popup-item">
-                    <span>📈 GDP</span>
-                    <span>${country.gdp}%</span>
-                </div>
-
-                <div class="popup-item">
-                    <span>📉 Inflation</span>
-                    <span>${country.inflation}%</span>
-                </div>
-
-                <div class="popup-item">
-                    <span>🌦 Weather</span>
-                    <span>${country.weather}</span>
-                </div>
-
-                <div class="popup-item">
-                    <span>⚓ Port</span>
-                    <span>${country.port}</span>
-                </div>
-
-            </div>
-        `);
-
-    });
-
-    // Zoom ke semua marker
-    if (bounds.length > 0) {
-        map.fitBounds(bounds, {
-            padding: [50, 50]
         });
-    } else {
-        // Jika tidak ada marker
-        map.setView([-2.5, 118], 5);
+
     }
 
 });
-
-console.log("MAP.JS LOADED");

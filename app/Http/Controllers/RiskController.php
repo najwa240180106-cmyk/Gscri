@@ -3,10 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Country;
+use Illuminate\Http\RedirectResponse;
 
 class RiskController extends Controller
 {
     public function index()
+    {
+        $countries = Country::orderBy('name')->get();
+
+        return view('risk.index', compact('countries'));
+    }
+
+    public function updateApi(): RedirectResponse
     {
         $countries = Country::all();
 
@@ -15,24 +23,27 @@ class RiskController extends Controller
             $score = 0;
 
             // GDP
-            if ($country->gdp < 3) {
+            if (($country->gdp ?? 0) < 3) {
                 $score++;
             }
 
             // Inflation
-            if ($country->inflation > 5) {
+            if (($country->inflation ?? 0) > 5) {
                 $score++;
             }
 
             // Weather
+            $weather = strtolower($country->weather ?? '');
+
             if (
-                str_contains(strtolower($country->weather), 'rain') ||
-                str_contains(strtolower($country->weather), 'storm')
+                str_contains($weather, 'rain') ||
+                str_contains($weather, 'storm') ||
+                str_contains($weather, 'thunder')
             ) {
                 $score++;
             }
 
-            // Tentukan Risk
+            // Risk Level
             if ($score >= 3) {
                 $country->risk = 'HIGH';
             } elseif ($score == 2) {
@@ -42,10 +53,11 @@ class RiskController extends Controller
             }
 
             $country->score = $score;
-
             $country->save();
         }
 
-        return view('risk.index', compact('countries'));
+        return redirect()
+            ->route('risk.index')
+            ->with('success', 'Risk analysis updated successfully.');
     }
 }

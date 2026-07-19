@@ -9,6 +9,13 @@ class NewsController extends Controller
 {
     public function index()
     {
+        return view('news.index', [
+            'news' => []
+        ]);
+    }
+
+    public function updateApi()
+    {
         $countries = Country::all();
 
         $news = [];
@@ -31,12 +38,16 @@ class NewsController extends Controller
                 foreach ($response->json()['articles'] ?? [] as $article) {
 
                     $article['country'] = $country->name;
-
                     $news[] = $article;
                 }
             }
         }
 
-        return view('news.index', compact('news'));
+        usort($news, function ($a, $b) {
+            return strtotime($b['publishedAt']) <=> strtotime($a['publishedAt']);
+        });
+
+        return view('news.index', compact('news'))
+            ->with('success', 'News updated successfully.');
     }
 }

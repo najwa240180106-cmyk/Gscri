@@ -20,6 +20,10 @@ class PortController extends Controller
 
         return view('ports.index', compact('ports'));
     }
+    public function show(Port $port)
+{
+    return view('ports.show', compact('port'));
+}
 
     /**
      * Import Port dari GeoNames

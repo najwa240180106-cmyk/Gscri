@@ -3,15 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Country;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Http;
 
 class WeatherController extends Controller
 {
     public function index()
     {
-        $countries = Country::all();
+        $countries = Country::orderBy('name')->get();
 
-        $weatherData = [];
+        return view('weather.index', compact('countries'));
+    }
+
+    public function updateApi(): RedirectResponse
+    {
+        $countries = Country::all();
 
         foreach ($countries as $country) {
 
@@ -28,16 +34,13 @@ class WeatherController extends Controller
 
                 $data = $response->json();
 
-                $weatherData[] = [
-                    'country'     => $country->name,
-                    'temperature' => $data['main']['temp'],
-                    'humidity'    => $data['main']['humidity'],
-                    'wind'        => $data['wind']['speed'],
-                    'condition'   => $data['weather'][0]['main'],
-                ];
+                $country->weather = $data['weather'][0]['main'];
+                $country->save();
             }
         }
 
-        return view('weather.index', compact('weatherData'));
+        return redirect()
+            ->route('weather.index')
+            ->with('success', 'Weather data updated successfully.');
     }
 }

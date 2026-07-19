@@ -2,18 +2,41 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Country extends Model
+class User extends Authenticatable
 {
+    use Notifiable;
+
     protected $fillable = [
         'name',
-        'risk',
-        'gdp',
-        'inflation',
-        'weather',
-        'port',
-        'latitude',
-        'longitude',
+        'email',
+        'password',
+        'role',
     ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * Cek apakah user adalah Admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Casting
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
 }

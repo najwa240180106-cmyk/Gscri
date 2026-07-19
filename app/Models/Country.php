@@ -19,6 +19,7 @@ class Country extends Model
         'port',
         'latitude',
         'longitude',
+        'score',
     ];
 
     public function ports(): HasMany

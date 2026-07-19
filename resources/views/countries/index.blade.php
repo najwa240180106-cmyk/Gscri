@@ -8,7 +8,9 @@
         <h2>🌍 Global Monitoring Countries</h2>
     </div>
 
-    {{-- Import Country --}}
+    {{-- Import hanya untuk Admin --}}
+    @if(auth()->user()->isAdmin())
+
     <form action="{{ route('countries.import') }}" method="POST" style="margin-bottom:20px;">
         @csrf
 
@@ -23,14 +25,17 @@
         </button>
     </form>
 
+    @endif
+
+    {{-- Alert --}}
     @if(session('success'))
-        <div style="color:green; margin-bottom:10px;">
+        <div class="alert-success">
             {{ session('success') }}
         </div>
     @endif
 
     @if(session('error'))
-        <div style="color:red; margin-bottom:10px;">
+        <div class="alert-error">
             {{ session('error') }}
         </div>
     @endif
@@ -53,12 +58,20 @@
 
             <tr>
                 <td>{{ $country->name }}</td>
-                <td>{{ $country->region }}</td>
-                <td>{{ $country->currency }}</td>
-                <td>🟢 Monitoring</td>
+                <td>{{ $country->region ?? '-' }}</td>
+                <td>{{ $country->currency ?? '-' }}</td>
+
+               <td>
+    <span class="badge badge-success">
+        Monitoring
+    </span>
+</td>
+
                 <td>
-                    <a href="#">View</a>
-                </td>
+    <a href="{{ route('countries.show', $country) }}" class="btn btn-primary">
+        View
+    </a>
+</td>
             </tr>
 
         @empty

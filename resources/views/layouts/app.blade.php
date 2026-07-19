@@ -9,6 +9,7 @@
 
     <title>GSCRI</title>
 
+    <!-- Leaflet CSS -->
     <link rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
@@ -36,7 +37,14 @@
 
     </div>
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Script dari setiap halaman -->
+    @stack('scripts')
 
 </body>
 

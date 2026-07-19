@@ -1,3 +1,2 @@
 
 import './map';
-import './chart';

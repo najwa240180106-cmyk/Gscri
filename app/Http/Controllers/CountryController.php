@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Http;
 class CountryController extends Controller
 {
     /**
-     * Menampilkan daftar negara dari database
+     * Menampilkan daftar negara
      */
     public function index()
     {
@@ -17,69 +17,106 @@ class CountryController extends Controller
 
         return view('countries.index', compact('countries'));
     }
+    public function show(Country $country)
+{
+    return view('countries.show', compact('country'));
+}
 
     /**
      * Import negara dari API Ninjas
      */
-public function import(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string',
-    ]);
-
-    // Ambil data negara dari API Ninjas
-    $response = Http::withoutVerifying()
-        ->withHeaders([
-            'X-Api-Key' => config('services.apininjas.key'),
-        ])
-        ->get('https://api.api-ninjas.com/v1/country', [
-            'name' => $request->name,
+    public function import(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
         ]);
 
-    if (!$response->successful() || empty($response->json())) {
-        return redirect()->back()->with('error', 'Negara tidak ditemukan.');
-    }
+        // API Ninjas
+        $response = Http::withoutVerifying()
+            ->withHeaders([
+                'X-Api-Key' => config('services.apininjas.key'),
+            ])
+            ->get('https://api.api-ninjas.com/v1/country', [
+                'name' => $request->name,
+            ]);
 
-    $item = $response->json()[0];
-   
+        if (!$response->successful() || empty($response->json())) {
+            return back()->with('error', 'Negara tidak ditemukan.');
+        }
 
-    // Ambil koordinat dari OpenStreetMap
-    $location = Http::withoutVerifying()
-        ->withHeaders([
-            'User-Agent' => 'GSCRI Laravel App',
-        ])
-        ->get('https://nominatim.openstreetmap.org/search', [
-            'q' => $item['name'],
-            'format' => 'json',
-            'limit' => 1,
-        ]);
+        $item = $response->json()[0];
 
-    $geo = $location->json();
+        // OpenStreetMap
+        $location = Http::withoutVerifying()
+            ->withHeaders([
+                'User-Agent' => 'GSCRI Laravel App',
+            ])
+            ->get('https://nominatim.openstreetmap.org/search', [
+                'q'      => $item['name'],
+                'format' => 'json',
+                'limit'  => 1,
+            ]);
 
-    Country::updateOrCreate(
-        [
-            'country_code' => $item['iso2'],
-        ],
-        [
-            'name'          => $item['name'],
-            'currency' => $item['currency']['code']
-    ?? $item['currency']['name']
-    ?? null,
-            'region'        => $item['region'] ?? null,
+        $geo = $location->json();
 
-            'gdp'           => 0,
-            'inflation'     => 0,
-            'weather'       => '-',
-            'risk'          => 'LOW',
-            'port'          => '-',
+        // Simpan Country
+        $country = Country::updateOrCreate(
+            [
+                'country_code' => $item['iso2'],
+            ],
+            [
+                'name'       => $item['name'],
+                'currency'   => $item['currency']['code']
+                                ?? $item['currency']['name']
+                                ?? null,
+                'region'     => $item['region'] ?? null,
 
-            'latitude'      => $geo[0]['lat'] ?? 0,
-            'longitude'     => $geo[0]['lon'] ?? 0,
-        ]
-    );
+                'gdp'        => 0,
+                'inflation'  => 0,
+                'weather'    => '-',
+                'risk'       => 'LOW',
+                'port'       => '-',
 
-    return redirect()
-        ->route('countries.index')
-        ->with('success', $item['name'].' berhasil diimport.');
+                'latitude'   => $geo[0]['lat'] ?? 0,
+                'longitude'  => $geo[0]['lon'] ?? 0,
+            ]
+        );
+
+        // Mapping ISO2 -> ISO3 (World Bank)
+        $mapping = [
+            'ID' => 'IDN',
+            'JP' => 'JPN',
+            'CN' => 'CHN',
+            'SG' => 'SGP',
+            'MY' => 'MYS',
+            'KR' => 'KOR',
+            'TH' => 'THA',
+            'VN' => 'VNM',
+            'US' => 'USA',
+        ];
+
+        $code = $mapping[$country->country_code] ?? null;
+
+        if ($code) {
+
+            // GDP
+            $gdp = Http::withoutVerifying()->get(
+                "https://api.worldbank.org/v2/country/{$code}/indicator/NY.GDP.MKTP.KD.ZG?format=json"
+            );
+
+            // Inflation
+            $inflation = Http::withoutVerifying()->get(
+                "https://api.worldbank.org/v2/country/{$code}/indicator/FP.CPI.TOTL.ZG?format=json"
+            );
+
+            $country->gdp = $gdp->json()[1][0]['value'] ?? 0;
+            $country->inflation = $inflation->json()[1][0]['value'] ?? 0;
+
+            $country->save();
+        }
+
+        return redirect()
+            ->route('countries.index')
+            ->with('success', $country->name . ' berhasil diimport.');
     }
 }
